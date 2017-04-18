@@ -3,7 +3,7 @@
 ## NOTE:
 - for latest RN, use latest
 - for RN < 0.40.0, use v2.5.6
-- for RN < 0.33.0, you need to user react-native-fcm@1.1.0
+- for RN < 0.33.0, you need to use react-native-fcm@1.1.0
 - for RN < 0.30.0, you need to use react-native-fcm@1.0.15
 - local notification is not only available in V1
 
@@ -159,7 +159,6 @@ Install the `Firebase/Messaging` pod:
 cd ios && pod init
 pod install Firebase/Messaging
 ```
-uncomment the "use_frameworks!" line in the podfile.
 
 ### Non Cocoapod approach
 
@@ -189,7 +188,10 @@ Edit `AppDelegate.m`:
   //...
 +   [FIRApp configure];
 +   [[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
-+ }
+
+    return YES;
+ }
+ 
 +
 + - (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
 + {
@@ -212,7 +214,10 @@ Edit `AppDelegate.m`:
 ```
 
 ### Xcode post installation steps
-- Select your project **Capabilities** and enable **Keychan Sharing** and *Background Modes* > **Remote notifications**.
+- Select your project **Capabilities** and enable:
+  - **Push Notifications**
+  - **Keychain Sharing** 
+  - *Background Modes* > **Remote notifications**.
 
 - In Xcode menu bar, select *Product* > *Scheme* > **Manage schemes**. Select your project name Scheme then click on the minus sign **―** in the bottom left corner, then click on the plus sign **+** and rebuild your project scheme.
 
@@ -384,7 +389,7 @@ Example of payload that is sent to FCM server:
 Check local notification guide below for configuration.
 
 ### Behaviour when sending `notification` and `data` payload through GCM
-- When app is not running and user clicks notification, notification data will be passed into `FCM.getInitialNotification` event
+- When user clicks notification to **launch** the application, you can get that notification by calling `FCM.getInitialNotification`. (NOTE: reloading javascript or resuming from background won't change the value)
 
 - When app is running in background (the tricky one, I strongly suggest you try it out yourself)
  - IOS will receive notificaton from `FCMNotificationReceived` event
@@ -498,6 +503,7 @@ You need to add this to your `android/app/proguard-rules.pro`:
 #### I'm getting `com.android.dex.DexException: Multiple dex files define Lcom/google/android/gms/internal/zzqf;`
 It is most likely that you are using other react-native-modules that requires conflicting google play service
 search for `compile "com.google.android.gms` in android and see who specifies specific version. Resolve conflict by loosing their version or specify a version resolve in gradle.
+Check this article https://medium.com/@suchydan/how-to-solve-google-play-services-version-collision-in-gradle-dependencies-ef086ae5c75f#.9l0u84y9t
 
 #### How do I tell if user clicks the notification banner?
 Check open from tray flag in notification. It will be either 0 or 1 for iOS and undefined or 1 for android. I decide for iOS based on [this](http://stackoverflow.com/questions/20569201/remote-notification-method-called-twice), and for android I set it if notification is triggered by intent change.
@@ -534,6 +540,9 @@ NOTE: this flag doesn't work for Android push notification, use `custom_notifica
 
 #### Do I need to handle APNS token registration?
 No. Method swizzling in Firebase Cloud Messaging handles this unless you turn that off. Then you are on your own to implement the handling. Check this link https://firebase.google.com/docs/cloud-messaging/ios/client
+
+#### I want to add actions in iOS notification
+Check this https://github.com/evollu/react-native-fcm/issues/325
 
 #### Some features are missing
 Issues and pull requests are welcome. Let's make this thing better!
